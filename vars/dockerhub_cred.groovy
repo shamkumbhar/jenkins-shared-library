@@ -1,12 +1,13 @@
-def loginAndPush(imageName) {
-    withCredentials([usernamePassword(
-        credentialsId: 'dockerhub-credentials',
-        usernameVariable: 'DOCKER_USER',
-        passwordVariable: 'DOCKER_PASS'
-    )]) {
-        sh """
-            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
-            docker push ${imageName}
-        """
-    }
+def call(String credId, String imageName){
+  withCredentials([usernamePassword(
+                    credentialsId:"${credId}",
+                    passwordVariable: "dockerHubPass",
+                    usernameVariable: "dockerHubUser"
+                )]){
+                
+                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                sh "docker image tag ${imageName} ${env.dockerHubUser}/${imageName}"
+                sh "docker push ${env.dockerHubUser}/${imageName}:latest"
+            
+                }  
 }
